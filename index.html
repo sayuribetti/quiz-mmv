@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiz MMV — Minha Melhor Versão</title>
- <!-- Meta Pixel Code -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -21,7 +22,6 @@ fbq('track', 'PageView');
 src="https://www.facebook.com/tr?id=4298301073748820&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -450,6 +450,18 @@ const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/FJNrhm41hTYBHcEvrSYHSY";
 
 const questions = [
   {
+    text: "Qual é a sua faixa etária?",
+    sub: "Isso me ajuda a personalizar sua experiência.",
+    multi: false,
+    options: [
+      { label: "18 a 24 anos", value: "18-24" },
+      { label: "25 a 34 anos", value: "25-34" },
+      { label: "35 a 44 anos", value: "35-44" },
+      { label: "45 a 54 anos", value: "45-54" },
+      { label: "55 anos ou mais", value: "55+" }
+    ]
+  },
+  {
     text: "Como você descreveria seu corpo hoje?",
     sub: "Seja honesta — sem julgamento aqui.",
     multi: false,
@@ -581,13 +593,19 @@ document.getElementById("btn-next").addEventListener("click", () => {
 function showResult() {
   showScreen("screen-result");
 
-  const body = answers[0];
-  const history = answers[1];
-  const symptoms = answers[2];
-  const duo = answers[3];
+  const age    = answers[0];
+  const body   = answers[1];
+  const history = answers[2];
+  const symptoms = answers[3];
+  const duo    = answers[4];
 
   let tag, title, msg;
   const symptomCount = Array.isArray(symptoms) ? symptoms.filter(s => s !== "outro").length : 0;
+
+  // Dispara evento Lead no Meta Pixel
+  if (typeof fbq !== "undefined") {
+    fbq('track', 'Lead', { content_name: 'Quiz MMV', faixa_etaria: age });
+  }
 
   if (body === "alto" || symptomCount >= 3) {
     tag = "seu corpo está pedindo socorro";
@@ -643,6 +661,8 @@ function showResult() {
 
   // Envia respostas para Formspree silenciosamente
   const labelMap2 = {
+    "18-24": "18 a 24 anos", "25-34": "25 a 34 anos", "35-44": "35 a 44 anos",
+    "45-54": "45 a 54 anos", "55+": "55 anos ou mais",
     alto: "Corpo em sofrimento — inchaço, cansaço, dores",
     medio: "Percebe que algo não está bem",
     baixo: "Quer melhorar, corpo razoável",
@@ -663,14 +683,15 @@ function showResult() {
     interessada: "Não sabe, mas o formato dupla interessou"
   };
 
-  const symptomsArr = Array.isArray(answers[2]) ? answers[2] : [answers[2]];
+  const symptomsArr = Array.isArray(answers[3]) ? answers[3] : [answers[3]];
 
   const payload = {
     nome: userName,
-    "como_esta_o_corpo": labelMap2[answers[0]] || answers[0],
-    "historico_de_tentativas": labelMap2[answers[1]] || answers[1],
+    "faixa_etaria": labelMap2[answers[0]] || answers[0],
+    "como_esta_o_corpo": labelMap2[answers[1]] || answers[1],
+    "historico_de_tentativas": labelMap2[answers[2]] || answers[2],
     "sintomas": symptomsArr.map(s => labelMap2[s] || s).join(", "),
-    "tem_dupla": labelMap2[answers[3]] || answers[3],
+    "tem_dupla": labelMap2[answers[4]] || answers[4],
     "perfil_resultado": tag
   };
 
