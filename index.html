@@ -392,7 +392,7 @@ src="https://www.facebook.com/tr?id=4298301073748820&ev=PageView&noscript=1"
   <div class="header">
     <span class="bee-icon">🐝</span>
     <h1>Você está pronta para ser a Abelha Rainha 👑?</h1>
-    <p>Responda 5 perguntas rápidas e descubra</p>
+    <p>Responda 4 perguntas rápidas e descubra</p>
   </div>
 
   <!-- Screen 1: Nome -->
@@ -400,7 +400,8 @@ src="https://www.facebook.com/tr?id=4298301073748820&ev=PageView&noscript=1"
     <div class="card name-screen">
       <p class="question" style="margin-bottom:0.5rem">Antes de começar, como posso te chamar?</p>
       <p class="question-sub">Quero falar com você pelo nome 🤍</p>
-      <input type="text" id="input-name" placeholder="Seu primeiro nome" autocomplete="given-name" />
+      <input type="text" id="input-firstname" placeholder="Seu primeiro nome" autocomplete="given-name" />
+      <input type="text" id="input-lastname" placeholder="Seu sobrenome" autocomplete="family-name" style="margin-top:0.75rem;" />
       <button class="btn" id="btn-name">Continuar →</button>
     </div>
   </div>
@@ -473,22 +474,11 @@ const questions = [
     ]
   },
   {
-    text: "Você já tentou emagrecer ou melhorar sua alimentação antes?",
-    sub: "Quero entender sua história.",
-    multi: false,
-    options: [
-      { label: "Já tentei tanta coisa que perdi as contas. Nada sustenta.", value: "muitas" },
-      { label: "Já tentei algumas coisas. Funciona no começo, mas não fico.", value: "algumas" },
-      { label: "Tentei pouco — nunca me senti pronta de verdade.", value: "poucas" },
-      { label: "Essa seria minha primeira tentativa real.", value: "primeira" }
-    ]
-  },
-  {
     text: "O que você mais sente no dia a dia?",
     sub: "Marque tudo que te identifica.",
     multi: true,
     options: [
-      { label: "Intestino preso ou irregulares", value: "intestino" },
+      { label: "Intestino preso ou irregular", value: "intestino" },
       { label: "Cansaço mesmo dormindo", value: "cansaco" },
       { label: "Compulsão por doce ou comida à noite", value: "compulsao" },
       { label: "Concentração baixa, mente acelerada", value: "concentracao" },
@@ -516,15 +506,20 @@ let multiSelected = [];
 
 // Name screen
 document.getElementById("btn-name").addEventListener("click", () => {
-  const val = document.getElementById("input-name").value.trim();
-  if (!val) return;
-  userName = val;
+  const first = document.getElementById("input-firstname").value.trim();
+  const last = document.getElementById("input-lastname").value.trim();
+  if (!first) return;
+  userName = first + (last ? " " + last : "");
   showScreen("screen-quiz");
   renderQuestion(0);
 });
 
-document.getElementById("input-name").addEventListener("keydown", e => {
+document.getElementById("input-lastname").addEventListener("keydown", e => {
   if (e.key === "Enter") document.getElementById("btn-name").click();
+});
+
+document.getElementById("input-firstname").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("input-lastname").focus();
 });
 
 function showScreen(id) {
@@ -593,11 +588,10 @@ document.getElementById("btn-next").addEventListener("click", () => {
 function showResult() {
   showScreen("screen-result");
 
-  const age    = answers[0];
-  const body   = answers[1];
-  const history = answers[2];
-  const symptoms = answers[3];
-  const duo    = answers[4];
+  const age      = answers[0];
+  const body     = answers[1];
+  const symptoms = answers[2];
+  const duo      = answers[3];
 
   let tag, title, msg;
   const symptomCount = Array.isArray(symptoms) ? symptoms.filter(s => s !== "outro").length : 0;
@@ -683,15 +677,14 @@ function showResult() {
     interessada: "Não sabe, mas o formato dupla interessou"
   };
 
-  const symptomsArr = Array.isArray(answers[3]) ? answers[3] : [answers[3]];
+  const symptomsArr = Array.isArray(answers[2]) ? answers[2] : [answers[2]];
 
   const payload = {
     nome: userName,
     "faixa_etaria": labelMap2[answers[0]] || answers[0],
     "como_esta_o_corpo": labelMap2[answers[1]] || answers[1],
-    "historico_de_tentativas": labelMap2[answers[2]] || answers[2],
     "sintomas": symptomsArr.map(s => labelMap2[s] || s).join(", "),
-    "tem_dupla": labelMap2[answers[4]] || answers[4],
+    "tem_dupla": labelMap2[answers[3]] || answers[3],
     "perfil_resultado": tag
   };
 
@@ -712,7 +705,8 @@ function restart() {
   answers = [];
   multiSelected = [];
   currentQ = 0;
-  document.getElementById("input-name").value = "";
+  document.getElementById("input-firstname").value = "";
+  document.getElementById("input-lastname").value = "";
   showScreen("screen-name");
 }
 </script>
